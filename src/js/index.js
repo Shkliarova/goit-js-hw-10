@@ -2,17 +2,15 @@ import axios from "axios";
 axios.defaults.headers.common["x-api-key"] = "live_dOJ39ImEqWH3cF1jUJI4PMe7tAnZXHOkINz33Hfe1NJ2IErVO1ESFhxy6AB6WCAO";
 import {fetchBreeds, fetchCatByBreed} from './cat-api'
 
-export const breedSelect = document.querySelector('.breed-select');
+const breedSelect = document.querySelector('.breed-select');
 
-export const infoLoader = document.querySelector('.loader');
-export const selectError = document.querySelector('.error');
-export const catInfo = document.querySelector('.cat-info');
+const infoLoader = document.querySelector('.loader');
+const selectError = document.querySelector('.error');
+const catInfo = document.querySelector('.cat-info');
 
 window.addEventListener('load', init);
 
 function init(){
-    selectError.style.display = 'none';
-    infoLoader.style.display = 'none';
     let breedsData;
     fetchBreeds()
     .then(data => {
@@ -22,11 +20,23 @@ function init(){
             option.value = breed.id;
             option.textContent = breed.name;
             breedSelect.appendChild(option);
+
+            breedSelect.classList.remove('is-hidden');
+            infoLoader.classList.add('is-hidden');
           })
     })
+    .catch(error => {
+        console.log(error);
+        selectError.classList.remove('is-hidden');
+        breedSelect.classList.add('is-hidden');
+        infoLoader.classList.add('is-hidden');
+    })
+
     breedSelect.addEventListener('change', () => {
         const selectBreedId = breedSelect.value;
-        infoLoader.style.display = 'block';
+        infoLoader.classList.remove('is-hidden');
+        catInfo.classList.add('is-hidden');
+        selectError.classList.add('is-hidden');
 
         fetchCatByBreed(selectBreedId)
         .then(result => {
@@ -35,6 +45,14 @@ function init(){
 
             const markup = createMarkup(catData, breedData);
             catInfo.innerHTML = markup;
+
+            infoLoader.classList.add('is-hidden');
+            catInfo.classList.remove('is-hidden');
+        })
+        .catch(error => {
+            console.log(error);
+            selectError.classList.remove('is-hidden');
+            infoLoader.classList.add('is-hidden');
         })
     });
 }
